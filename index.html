@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Scrollable Background</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP for animations (ScrollTrigger is no longer needed but GSAP is good practice) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+      /* Combines the animated gradient with a fixed canvas background */
+
+      /* 1. Animated Gradient on the Body */
+      body {
+        /* Defines a large gradient that we can move around */
+        background: linear-gradient(220deg, #070706, #0a011a, #1f0a33, #070706);
+        background-size: 200% 200%;
+        /* Links the animation keyframes, making it last 25s and loop forever */
+        animation: background-pan 25s ease infinite;
+      }
+
+      @keyframes background-pan {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      #hero {
+        position: relative;
+        overflow: hidden;
+      }
+
+      #plexus-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      #mouse-spotlight {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(
+          600px at var(--mouse-x) var(--mouse-y),
+          rgba(68, 0, 204, 0.15),
+          transparent 80%
+        );
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* UPDATED: Minimalist Shape Styling */
+      .minimal-shape {
+        position: absolute;
+        opacity: 0.15; /* Balanced visibility */
+        stroke: #ffd900;
+        stroke-width: 1; /* Fine lines for a clean look */
+        fill: none;
+        pointer-events: none;
+        animation: spin 120s linear infinite;
+        /* PERFORMANCE BOOST: Hint to the browser to optimize for transform changes */
+        will-change: transform;
+      }
+
+      .shape-1 {
+        width: 45%;
+        max-width: 350px;
+        top: 10%;
+        left: -15%;
+        animation-duration: 160s; /* Slower rotation */
+      }
+      .shape-2 {
+        width: 35%;
+        max-width: 300px;
+        bottom: -10%;
+        right: -10%;
+        animation-direction: reverse;
+        animation-duration: 110s;
+      }
+      .shape-3 {
+        width: 20%;
+        max-width: 180px;
+        top: 20%;
+        right: 8%;
+        animation-duration: 90s; /* Faster rotation */
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      main {
+        position: relative;
+        z-index: 10;
+      }
+
+      .text-glow {
+        text-shadow: 0 0 12px rgba(255, 217, 0, 0.5);
+      }
+    </style>
+  </head>
+  <body class="text-white antialiased">
+    <!-- ADDED: Empty Navbar -->
+    <header
+      class="fixed top-0 left-0 w-full h-16 bg-black/20 backdrop-blur-sm z-20"
+    ></header>
+
+    <!-- The main scrollable content area -->
+    <main>
+      <!-- Each section is the full height of the screen to demonstrate scrolling -->
+      <section id="hero" class="h-screen flex items-center justify-center">
+        <!-- Spotlight and Canvas are now INSIDE the hero section -->
+        <div id="mouse-spotlight"></div>
+        <canvas id="plexus-canvas"></canvas>
+
+        <h1
+          class="relative z-10 text-7xl md:text-8xl font-extrabold text-center text-glow"
+        >
+          Hero Section
+        </h1>
+      </section>
+
+      <section
+        id="network"
+        class="h-screen flex items-center justify-center relative"
+      >
+        <!-- UPDATED: Minimalist Shape Backgrounds -->
+        <svg
+          class="minimal-shape shape-1"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="50" cy="50" r="10" fill="#FFD900" stroke="none" />
+          <circle cx="50" cy="50" r="30" />
+          <ellipse cx="50" cy="50" rx="45" ry="20" />
+          <ellipse cx="50" cy="50" rx="20" ry="45" />
+        </svg>
+        <svg
+          class="minimal-shape shape-2"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M 30 20 L 20 20 L 20 80 L 30 80" stroke-width="2" />
+          <path d="M 70 20 L 80 20 L 80 80 L 70 80" stroke-width="2" />
+          <rect
+            x="40"
+            y="40"
+            width="20"
+            height="20"
+            fill="#FFD900"
+            stroke="none"
+          />
+        </svg>
+        <svg
+          class="minimal-shape shape-3"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="30" cy="30" r="15" />
+          <rect
+            x="55"
+            y="55"
+            width="25"
+            height="25"
+            fill="#FFD900"
+            stroke="none"
+          />
+          <path d="M 20 80 L 80 20" />
+        </svg>
+        <h2
+          class="relative z-10 text-6xl md:text-7xl font-bold text-center text-glow"
+        >
+          Network Section
+        </h2>
+      </section>
+
+      <section
+        id="team"
+        class="h-screen flex items-center justify-center relative"
+      >
+        <svg
+          class="minimal-shape shape-1"
+          style="top: 5%; right: -10%; left: auto"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="30" cy="30" r="15" />
+          <rect
+            x="55"
+            y="55"
+            width="25"
+            height="25"
+            fill="#FFD900"
+            stroke="none"
+          />
+          <path d="M 20 80 L 80 20" />
+        </svg>
+        <svg
+          class="minimal-shape shape-2"
+          style="bottom: -5%; left: -10%; right: auto"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="50" cy="50" r="10" fill="#FFD900" stroke="none" />
+          <circle cx="50" cy="50" r="30" />
+          <ellipse cx="50" cy="50" rx="45" ry="20" />
+        </svg>
+        <svg
+          class="minimal-shape shape-3"
+          style="top: 60%; right: 20%"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M 30 20 L 20 20 L 20 80 L 30 80" stroke-width="2" />
+          <path d="M 70 20 L 80 20 L 80 80 L 70 80" stroke-width="2" />
+        </svg>
+        <h2
+          class="relative z-10 text-6xl md:text-7xl font-bold text-center text-glow"
+        >
+          Team Section
+        </h2>
+      </section>
+
+      <section
+        id="achievements"
+        class="h-screen flex items-center justify-center relative"
+      >
+        <svg
+          class="minimal-shape shape-1"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="50" cy="50" r="10" fill="#FFD900" stroke="none" />
+          <circle cx="50" cy="50" r="30" />
+          <ellipse cx="50" cy="50" rx="45" ry="20" />
+          <ellipse cx="50" cy="50" rx="20" ry="45" />
+        </svg>
+        <svg
+          class="minimal-shape shape-2"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M 30 20 L 20 20 L 20 80 L 30 80" stroke-width="2" />
+          <path d="M 70 20 L 80 20 L 80 80 L 70 80" stroke-width="2" />
+          <rect
+            x="40"
+            y="40"
+            width="20"
+            height="20"
+            fill="#FFD900"
+            stroke="none"
+          />
+        </svg>
+        <svg
+          class="minimal-shape shape-3"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="30" cy="30" r="15" />
+          <rect
+            x="55"
+            y="55"
+            width="25"
+            height="25"
+            fill="#FFD900"
+            stroke="none"
+          />
+          <path d="M 20 80 L 80 20" />
+        </svg>
+        <h2
+          class="relative z-10 text-6xl md:text-7xl font-bold text-center text-glow"
+        >
+          Achievements Section
+        </h2>
+      </section>
+
+      <section
+        id="contact"
+        class="h-screen flex items-center justify-center relative"
+      >
+        <svg
+          class="minimal-shape shape-1"
+          style="top: 5%; right: -10%; left: auto"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="30" cy="30" r="15" />
+          <rect
+            x="55"
+            y="55"
+            width="25"
+            height="25"
+            fill="#FFD900"
+            stroke="none"
+          />
+          <path d="M 20 80 L 80 20" />
+        </svg>
+        <svg
+          class="minimal-shape shape-2"
+          style="bottom: -5%; left: -10%; right: auto"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle cx="50" cy="50" r="10" fill="#FFD900" stroke="none" />
+          <circle cx="50" cy="50" r="30" />
+          <ellipse cx="50" cy="50" rx="45" ry="20" />
+        </svg>
+        <svg
+          class="minimal-shape shape-3"
+          style="top: 60%; right: 20%"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M 30 20 L 20 20 L 20 80 L 30 80" stroke-width="2" />
+          <path d="M 70 20 L 80 20 L 80 80 L 70 80" stroke-width="2" />
+        </svg>
+        <h2
+          class="relative z-10 text-6xl md:text-7xl font-bold text-center text-glow"
+        >
+          Contact Section
+        </h2>
+      </section>
+    </main>
+
+    <!-- ADDED: Empty Footer -->
+    <footer class="relative z-20 h-24 bg-black/40"></footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const spotlight = document.getElementById("mouse-spotlight");
+        window.addEventListener("mousemove", (e) => {
+          requestAnimationFrame(() => {
+            spotlight.style.setProperty("--mouse-x", e.clientX + "px");
+            spotlight.style.setProperty("--mouse-y", e.clientY + "px");
+          });
+        });
+
+        const canvas = document.getElementById("plexus-canvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        let animationFrameId;
+
+        let particles = [];
+        const mouse = { x: null, y: null, radius: 100 };
+
+        function setup() {
+          const heroSection = document.getElementById("hero");
+          canvas.width = heroSection.offsetWidth;
+          canvas.height = heroSection.offsetHeight;
+          particles = [];
+          const numberOfParticles = (canvas.width * canvas.height) / 10000;
+          for (let i = 0; i < numberOfParticles; i++) {
+            let size = Math.random() * 2 + 1;
+            let x = Math.random() * (canvas.width - size * 2) + size;
+            let y = Math.random() * (canvas.height - size * 2) + size;
+            let directionX = Math.random() * 0.4 - 0.2;
+            let directionY = Math.random() * 0.4 - 0.2;
+            particles.push({ x, y, directionX, directionY, size });
+          }
+        }
+
+        function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (let i = 0; i < particles.length; i++) {
+            let p = particles[i];
+
+            if (mouse.x && mouse.y) {
+              const dx = mouse.x - p.x;
+              const dy = mouse.y - p.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              if (distance < mouse.radius) {
+                const forceDirectionX = dx / distance;
+                const forceDirectionY = dy / distance;
+                const maxDistance = mouse.radius;
+                const force = (maxDistance - distance) / maxDistance;
+                const directionX = forceDirectionX * force * 0.5;
+                const directionY = forceDirectionY * force * 0.5;
+                p.x -= directionX;
+                p.y -= directionY;
+              }
+            }
+
+            p.x += p.directionX;
+            p.y += p.directionY;
+
+            if (p.x + p.size > canvas.width || p.x - p.size < 0)
+              p.directionX = -p.directionX;
+            if (p.y + p.size > canvas.height || p.y - p.size < 0)
+              p.directionY = -p.directionY;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255, 217, 0, 0.7)";
+            ctx.fill();
+          }
+          connect();
+          animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function connect() {
+          let opacityValue = 1;
+          for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+              let distance = Math.sqrt(
+                (particles[a].x - particles[b].x) ** 2 +
+                  (particles[a].y - particles[b].y) ** 2
+              );
+              if (distance < 120) {
+                opacityValue = 1 - distance / 120;
+                ctx.strokeStyle = `rgba(210, 210, 255, ${opacityValue * 0.5})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(particles[a].x, particles[a].y);
+                ctx.lineTo(particles[b].x, particles[b].y);
+                ctx.stroke();
+              }
+            }
+          }
+        }
+
+        window.addEventListener("mousemove", (e) => {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+        });
+        window.addEventListener("mouseout", () => {
+          mouse.x = null;
+          mouse.y = null;
+        });
+
+        window.addEventListener("resize", () => {
+          cancelAnimationFrame(animationFrameId);
+          setup();
+          animate();
+        });
+
+        setup();
+        animate();
+      });
+    </script>
+  </body>
+</html>
