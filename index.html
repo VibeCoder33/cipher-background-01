@@ -114,6 +114,39 @@
       .text-glow {
         text-shadow: 0 0 12px rgba(255, 217, 0, 0.5);
       }
+
+      /* Custom Slider Styles */
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        outline: none;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        cursor: pointer;
+      }
+      input[type="range"]:hover {
+        opacity: 1;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #ffd900;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: #ffd900;
+        cursor: pointer;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body class="text-white antialiased">
@@ -135,6 +168,51 @@
         >
           Hero Section
         </h1>
+
+        <!-- ADDED: UI Controls for Plexus Network -->
+        <div
+          id="controls"
+          class="absolute bottom-4 left-4 z-20 p-4 bg-black/40 backdrop-blur-sm rounded-lg text-white space-y-3 w-52"
+        >
+          <div>
+            <label
+              for="particle-slider"
+              class="flex justify-between items-center text-sm font-medium"
+            >
+              <span>Particle Density</span>
+              <span id="particle-value" class="text-xs text-yellow-300"
+                >Medium</span
+              >
+            </label>
+            <input
+              id="particle-slider"
+              type="range"
+              min="5000"
+              max="20000"
+              value="10000"
+              class="w-full mt-1"
+            />
+          </div>
+          <div>
+            <label
+              for="distance-slider"
+              class="flex justify-between items-center text-sm font-medium"
+            >
+              <span>Connect Distance</span>
+              <span id="distance-value" class="text-xs text-yellow-300"
+                >120px</span
+              >
+            </label>
+            <input
+              id="distance-slider"
+              type="range"
+              min="50"
+              max="250"
+              value="120"
+              class="w-full mt-1"
+            />
+          </div>
+        </div>
       </section>
 
       <section
@@ -357,6 +435,16 @@
         const ctx = canvas.getContext("2d");
         let animationFrameId;
 
+        // --- ADDED: Control Elements ---
+        const particleSlider = document.getElementById("particle-slider");
+        const distanceSlider = document.getElementById("distance-slider");
+        const particleValueDisplay = document.getElementById("particle-value");
+        const distanceValueDisplay = document.getElementById("distance-value");
+
+        // --- ADDED: Variables for controls ---
+        let particleDensity = particleSlider.value; // Lower value = more particles
+        let connectionDistance = distanceSlider.value;
+
         let particles = [];
         const mouse = { x: null, y: null, radius: 100 };
 
@@ -365,7 +453,9 @@
           canvas.width = heroSection.offsetWidth;
           canvas.height = heroSection.offsetHeight;
           particles = [];
-          const numberOfParticles = (canvas.width * canvas.height) / 10000;
+          // MODIFIED: Use variable for number of particles
+          const numberOfParticles =
+            (canvas.width * canvas.height) / particleDensity;
           for (let i = 0; i < numberOfParticles; i++) {
             let size = Math.random() * 2 + 1;
             let x = Math.random() * (canvas.width - size * 2) + size;
@@ -422,8 +512,9 @@
                 (particles[a].x - particles[b].x) ** 2 +
                   (particles[a].y - particles[b].y) ** 2
               );
-              if (distance < 120) {
-                opacityValue = 1 - distance / 120;
+              // MODIFIED: Use variable for connection distance
+              if (distance < connectionDistance) {
+                opacityValue = 1 - distance / connectionDistance;
                 ctx.strokeStyle = `rgba(210, 210, 255, ${opacityValue * 0.5})`;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -452,6 +543,26 @@
 
         setup();
         animate();
+
+        // --- ADDED: Event Listeners for sliders ---
+        particleSlider.addEventListener("input", (e) => {
+          const density = e.target.value;
+          if (density < 8000) particleValueDisplay.textContent = "High";
+          else if (density < 15000) particleValueDisplay.textContent = "Medium";
+          else particleValueDisplay.textContent = "Low";
+        });
+
+        particleSlider.addEventListener("change", (e) => {
+          particleDensity = e.target.value;
+          cancelAnimationFrame(animationFrameId);
+          setup(); // Re-initializes the particles with new density
+          animate();
+        });
+
+        distanceSlider.addEventListener("input", (e) => {
+          connectionDistance = e.target.value;
+          distanceValueDisplay.textContent = `${connectionDistance}px`;
+        });
       });
     </script>
   </body>
